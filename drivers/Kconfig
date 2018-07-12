@@ -229,4 +229,6 @@ source "drivers/esoc/Kconfig"
 
 source "techpack/data/drivers/Kconfig"
 
+source "drivers/energy_model/Kconfig"
+
 endmenu
