@@ -692,9 +692,14 @@ static int fg_get_prop_capacity(struct fg_dev *fg, int *val)
 		return 0;
 	}
 
-	if (fg->battery_missing || !fg->soc_reporting_ready) {
+	if (fg->battery_missing) {
 		*val = BATT_MISS_SOC;
 		return 0;
+	}
+
+	if (!fg->soc_reporting_ready) {
+		*val = BATT_MISS_SOC;
+		return -EBUSY;
 	}
 
 	if (is_batt_empty(fg)) {
