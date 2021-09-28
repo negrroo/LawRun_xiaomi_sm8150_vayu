@@ -516,11 +516,15 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	if (!panel || !panel->cur_mode)
 		return -EINVAL;
 
+
+    pr_info("[%s] commands to be sent for state(%d)\n",panel->name, type);
+
 	mode = panel->cur_mode;
 
 	cmds = mode->priv_info->cmd_sets[type].cmds;
 	count = mode->priv_info->cmd_sets[type].count;
 	state = mode->priv_info->cmd_sets[type].state;
+
 
 	if (count == 0) {
 		pr_debug("[%s] No commands to be sent for state(%d)\n",
@@ -4345,6 +4349,9 @@ int dsi_panel_enable(struct dsi_panel *panel)
 	if (panel->cabc_mode)
 		dsi_panel_apply_cabc_mode(panel);
 
+	if (panel->dimming_mode)
+		dsi_panel_apply_dimming_mode(panel);
+
 	return rc;
 }
 
@@ -4489,60 +4496,12 @@ void dsi_panel_doubleclick_enable(bool on) {
 }
 EXPORT_SYMBOL(dsi_panel_doubleclick_enable);
 
-int dsi_panel_apply_hbm_mode(struct dsi_panel *panel)
-{
-	static const enum dsi_cmd_set_type type_map[] = {
-		DSI_CMD_SET_DISP_LCD_HBM_OFF,
-		DSI_CMD_SET_DISP_LCD_HBM_L1_ON,
-		DSI_CMD_SET_DISP_LCD_HBM_L2_ON
-	};
-
-	enum dsi_cmd_set_type type;
-	int rc;
-
-	if (panel->hbm_mode >= 0 &&
-		panel->hbm_mode < ARRAY_SIZE(type_map))
-		type = type_map[panel->hbm_mode];
-	else
-		type = type_map[0];
-
-	mutex_lock(&panel->panel_lock);
-	rc = dsi_panel_tx_cmd_set(panel, type);
-	mutex_unlock(&panel->panel_lock);
-
-	return rc;
-}
-
-int dsi_panel_apply_cabc_mode(struct dsi_panel *panel)
-{
-	static const enum dsi_cmd_set_type type_map[] = {
-		DSI_CMD_SET_DISP_CABC_OFF,
-		DSI_CMD_SET_DISP_CABC_UI_ON,
-		DSI_CMD_SET_DISP_CABC_STILL_ON,
-		DSI_CMD_SET_DISP_CABC_MOVIE_ON
-	};
-
-	enum dsi_cmd_set_type type;
-	int rc;
-
-	if (panel->cabc_mode >= 0 &&
-		panel->cabc_mode < ARRAY_SIZE(type_map))
-		type = type_map[panel->cabc_mode];
-	else
-		type = type_map[0];
-
-	mutex_lock(&panel->panel_lock);
-	rc = dsi_panel_tx_cmd_set(panel, type);
-	mutex_unlock(&panel->panel_lock);
-
-	return rc;
-}
 int dsi_panel_set_feature(struct dsi_panel *panel, enum dsi_cmd_set_type type)
 {
 		int rc = 0;
 
 		if (!panel || type < 0 || type >= DSI_CMD_SET_MAX) {
-			pr_err("Invalid params\n");
+			pr_err("Invalid parameter %d\n", type);
 			return -EINVAL;
 		}
 
@@ -4563,4 +4522,76 @@ int dsi_panel_set_feature(struct dsi_panel *panel, enum dsi_cmd_set_type type)
 		return rc;
 }
 
->>>>>>> d80f87bd7bed... Add HBM,CABC and Dimming support
+int dsi_panel_apply_hbm_mode(struct dsi_panel *panel)
+{
+	static const enum dsi_cmd_set_type type_map[] = {
+		DSI_CMD_SET_HBM_OFF,
+		DSI_CMD_SET_HBM1_ON,
+		DSI_CMD_SET_HBM2_ON
+	};
+
+	enum dsi_cmd_set_type type;
+	int rc;
+
+	if (panel->hbm_mode >= 0 &&
+		panel->hbm_mode < ARRAY_SIZE(type_map))
+		type = type_map[panel->hbm_mode];
+	else
+		type = type_map[0];
+
+	//mutex_lock(&panel->panel_lock);
+	//rc = dsi_panel_tx_cmd_set(panel, type);
+	//mutex_unlock(&panel->panel_lock);
+
+	return dsi_panel_set_feature(panel, type);
+}
+
+int dsi_panel_apply_cabc_mode(struct dsi_panel *panel)
+{
+	static const enum dsi_cmd_set_type type_map[] = {
+		DSI_CMD_SET_CABCOFF,
+		DSI_CMD_SET_CABCUION,
+		DSI_CMD_SET_CABCMOVIEON,
+		DSI_CMD_SET_CABCSTILLON
+	};
+
+	enum dsi_cmd_set_type type;
+	int rc;
+
+	if (panel->cabc_mode >= 0 &&
+		panel->cabc_mode < ARRAY_SIZE(type_map))
+		type = type_map[panel->cabc_mode];
+	else
+		type = type_map[0];
+
+	//mutex_lock(&panel->panel_lock);
+	//rc = dsi_panel_tx_cmd_set(panel, type);
+	//mutex_unlock(&panel->panel_lock);
+
+	return dsi_panel_set_feature(panel, type);
+}
+
+int dsi_panel_apply_dimming_mode(struct dsi_panel *panel)
+{
+	static const enum dsi_cmd_set_type type_map[] = {
+		DSI_CMD_SET_DIMMINGOFF,
+		DSI_CMD_SET_DIMMINGON,
+	};
+
+	enum dsi_cmd_set_type type;
+	int rc;
+
+	if (panel->dimming_mode >= 0 &&
+		panel->dimming_mode < ARRAY_SIZE(type_map))
+		type = type_map[panel->dimming_mode];
+	else
+		type = type_map[0];
+
+	//mutex_lock(&panel->panel_lock);
+	//rc = dsi_panel_tx_cmd_set(panel, type);
+	//mutex_unlock(&panel->panel_lock);
+
+
+	return dsi_panel_set_feature(panel, type);
+}
+
